@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { logActivity } from "@/lib/activity-logger";
+import { sendEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,15 +80,27 @@ export async function POST(req: NextRequest) {
       await usersCollection.updateOne({ _id: currentUser._id }, updatePayload);
 
       // Notify project owner
+      const message = `${currentUser.name || currentUser.email} accepted your invitation to join ${project.name}.`;
       await notificationsCollection.insertOne({
         userId: notification.fromUserId,
         type: "invite_accepted",
         title: "Invitation Accepted",
-        message: `${currentUser.name || currentUser.email} accepted your invitation to join ${project.name}.`,
+        message,
         relatedItemId: currentUser._id.toString(),
         read: false,
         createdAt: new Date(),
       });
+
+      const ownerUser = await usersCollection.findOne({
+        _id: new ObjectId(notification.fromUserId),
+      });
+      if (ownerUser && ownerUser.email) {
+        await sendEmail({
+          to: ownerUser.email,
+          subject: "Project Invitation Accepted",
+          html: `<p>Hi ${ownerUser.name || "there"},</p><p>${message}</p>`,
+        });
+      }
 
       await logActivity(currentUser._id.toString(), "joined_team", {
         projectId: notification.projectId,
@@ -97,15 +110,27 @@ export async function POST(req: NextRequest) {
     } else if (action === "reject") {
       // Notify project owner
       if (project && currentUser) {
+        const message = `${currentUser.name || currentUser.email} declined your invitation to join ${project.name}.`;
         await notificationsCollection.insertOne({
           userId: notification.fromUserId,
           type: "invite_rejected",
           title: "Invitation Rejected",
-          message: `${currentUser.name || currentUser.email} declined your invitation to join ${project.name}.`,
+          message,
           relatedItemId: currentUser._id.toString(),
           read: false,
           createdAt: new Date(),
         });
+
+        const ownerUser = await usersCollection.findOne({
+          _id: new ObjectId(notification.fromUserId),
+        });
+        if (ownerUser && ownerUser.email) {
+          await sendEmail({
+            to: ownerUser.email,
+            subject: "Project Invitation Declined",
+            html: `<p>Hi ${ownerUser.name || "there"},</p><p>${message}</p>`,
+          });
+        }
 
         await logActivity(currentUser._id.toString(), "rejected_team_invite", {
           projectId: notification.projectId,

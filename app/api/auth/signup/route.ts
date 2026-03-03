@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { hashPassword, generateToken } from "@/lib/auth";
-import { UserSchema } from "@/lib/schemas";
+import { hashPassword } from "@/lib/auth";
 import { logActivity } from "@/lib/activity-logger";
+import { sendEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,17 +20,48 @@ export async function POST(req: NextRequest) {
     const { db } = await connectToDatabase();
     const usersCollection = db.collection("users");
 
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
     // Check if user exists
     const existingUser = await usersCollection.findOne({ email });
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 409 },
-      );
-    }
-
-    // Hash password
     const hashedPassword = await hashPassword(password);
+
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return NextResponse.json(
+          { error: "User already exists" },
+          { status: 409 },
+        );
+      } else {
+        // Update unverified user with new OTP and credentials
+        await usersCollection.updateOne(
+          { _id: existingUser._id },
+          {
+            $set: {
+              name,
+              password: hashedPassword,
+              otp,
+              otpExpiry,
+              updatedAt: new Date(),
+            },
+          },
+        );
+
+        // Send OTP email
+        await sendEmail({
+          to: email,
+          subject: "Your Signup OTP",
+          html: `<p>Hi ${name},</p><p>Your OTP for signup is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`,
+        });
+
+        return NextResponse.json(
+          { message: "OTP sent to your email", email },
+          { status: 200 },
+        );
+      }
+    }
 
     // Create user
     const newUser = {
@@ -40,32 +71,30 @@ export async function POST(req: NextRequest) {
       timezone: "UTC",
       role: "user",
       onboardingComplete: false,
+      isVerified: false,
+      otp,
+      otpExpiry,
+      projects: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const result = await usersCollection.insertOne(newUser);
-    await logActivity(result.insertedId, "signed_up", { email });
-
-    // Generate token
-    const token = generateToken({
-      userId: result.insertedId.toString(),
+    await logActivity(result.insertedId.toString(), "signup_initiated", {
       email,
     });
 
-    const response = NextResponse.json(
-      { userId: result.insertedId, email, name },
-      { status: 201 },
-    );
-
-    response.cookies.set("auth-token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+    // Send OTP email
+    await sendEmail({
+      to: email,
+      subject: "Your Signup OTP",
+      html: `<p>Hi ${name},</p><p>Your OTP for signup is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`,
     });
 
-    return response;
+    return NextResponse.json(
+      { message: "OTP sent to your email", email, userId: result.insertedId },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json(

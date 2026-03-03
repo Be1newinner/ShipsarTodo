@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { logActivity } from "@/lib/activity-logger";
+import { sendEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -95,11 +96,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create a team_invite notification instead of adding directly
+    const message = `${currentUser.name || currentUser.email} has invited you to join the project "${project.name}".`;
+
     const newNotification = {
       userId: newMember._id.toString(),
       type: "team_invite",
       title: "Team Invitation",
-      message: `${currentUser.name || currentUser.email} has invited you to join the project "${project.name}".`,
+      message,
       fromUserId: currentUser._id.toString(),
       projectId: projectId.toString(),
       read: false,
@@ -110,6 +113,13 @@ export async function POST(request: NextRequest) {
     await logActivity(currentUser._id.toString(), "sent_team_invite", {
       toUserId: newMember._id.toString(),
       projectId: projectId.toString(),
+    });
+
+    // Send email notification
+    await sendEmail({
+      to: newMember.email,
+      subject: "You have been invited to a project",
+      html: `<p>Hi ${newMember.name || "there"},</p><p>${message}</p>`,
     });
 
     // Assuming we do not have an updated team member list since the member is not added yet,

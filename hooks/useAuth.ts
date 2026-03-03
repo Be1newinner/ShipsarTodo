@@ -52,6 +52,21 @@ export function useAuth() {
       throw new Error(err.error || "Signup failed");
     }
 
+    return await res.json();
+  };
+
+  const verifyOtp = async (email: string, otp: string) => {
+    const res = await fetch("/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "OTP Verification failed");
+    }
+
     const userData = await res.json();
     mutate(userData);
     return userData;
@@ -68,6 +83,7 @@ export function useAuth() {
     isLoading,
     login,
     signup,
+    verifyOtp,
     logout,
     isAuthenticated: !!user,
   };

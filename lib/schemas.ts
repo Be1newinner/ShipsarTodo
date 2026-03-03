@@ -11,6 +11,9 @@ export const UserSchema = z.object({
   onboardingComplete: z.boolean().default(false),
   activeProjectId: z.string().optional(),
   projects: z.array(z.string()).default([]),
+  isVerified: z.boolean().default(false),
+  otp: z.string().optional(),
+  otpExpiry: z.date().optional(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
 });
