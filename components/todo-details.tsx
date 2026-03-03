@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Todo } from '@/lib/types';
+import { useState } from "react";
+import { Todo } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { showSuccess, showError } from '@/lib/toast-utils';
-import { apiPut } from '@/lib/api';
-import { format } from 'date-fns';
-import { Clock, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { showSuccess, showError } from "@/lib/toast-utils";
+import { apiPut } from "@/lib/api";
+import { format } from "date-fns";
+import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
 
 interface TodoDetailsProps {
   todo: Todo;
@@ -32,15 +32,17 @@ interface TodoDetailsProps {
 }
 
 const priorityColors = {
-  low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  medium:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
 const statusColors = {
-  pending: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-  in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  pending: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+  in_progress: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  completed:
+    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
 };
 
 export function TodoDetails({
@@ -50,7 +52,7 @@ export function TodoDetails({
   onUpdate,
 }: TodoDetailsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
-  const [description, setDescription] = useState(todo.description || '');
+  const [description, setDescription] = useState(todo.description || "");
   const [status, setStatus] = useState(todo.status);
   const [priority, setPriority] = useState(todo.priority);
 
@@ -63,9 +65,9 @@ export function TodoDetails({
         priority,
       });
       onUpdate(updated);
-      showSuccess('Todo updated successfully');
+      showSuccess("Todo updated successfully");
     } catch (error) {
-      showError('Failed to update todo', error);
+      showError("Failed to update todo", error);
     } finally {
       setIsUpdating(false);
     }
@@ -77,7 +79,7 @@ export function TodoDetails({
         <DialogHeader>
           <DialogTitle className="text-2xl">{todo.title}</DialogTitle>
           <DialogDescription>
-            Created {format(new Date(todo.createdAt), 'MMM d, yyyy')}
+            Created {format(new Date(todo.createdAt), "MMM d, yyyy")}
           </DialogDescription>
         </DialogHeader>
 
@@ -86,7 +88,10 @@ export function TodoDetails({
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="text-sm font-medium mb-2 block">Status</label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select
+                value={status}
+                onValueChange={(val) => setStatus(val as typeof status)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -99,7 +104,10 @@ export function TodoDetails({
             </div>
             <div className="flex-1">
               <label className="text-sm font-medium mb-2 block">Priority</label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select
+                value={priority}
+                onValueChange={(val) => setPriority(val as typeof priority)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -118,7 +126,8 @@ export function TodoDetails({
               {priority.charAt(0).toUpperCase() + priority.slice(1)} Priority
             </Badge>
             <Badge className={statusColors[status]}>
-              {status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1)}
+              {status.replace("_", " ").charAt(0).toUpperCase() +
+                status.slice(1)}
             </Badge>
           </div>
 
@@ -126,13 +135,17 @@ export function TodoDetails({
           {todo.dueDate && (
             <div className="flex items-center gap-2 text-sm">
               <Clock className="w-4 h-4" />
-              <span>Due: {format(new Date(todo.dueDate), 'MMM d, yyyy HH:mm')}</span>
+              <span>
+                Due: {format(new Date(todo.dueDate), "MMM d, yyyy HH:mm")}
+              </span>
             </div>
           )}
 
           {/* Description */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Description</label>
+            <label className="text-sm font-medium mb-2 block">
+              Description
+            </label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -154,7 +167,8 @@ export function TodoDetails({
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle className="w-4 h-4" />
               <span>
-                Completion Probability: {Math.round(todo.completionProbability * 100)}%
+                Completion Probability:{" "}
+                {Math.round(todo.completionProbability * 100)}%
               </span>
             </div>
           )}
@@ -165,7 +179,10 @@ export function TodoDetails({
               <label className="text-sm font-medium mb-2 block">Subtasks</label>
               <div className="space-y-2">
                 {todo.subtasks.map((subtask) => (
-                  <div key={subtask._id} className="flex items-center gap-2 text-sm">
+                  <div
+                    key={subtask._id}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       defaultChecked={subtask.completed}
@@ -173,7 +190,11 @@ export function TodoDetails({
                       className="w-4 h-4"
                     />
                     <span
-                      className={subtask.completed ? 'line-through text-muted-foreground' : ''}
+                      className={
+                        subtask.completed
+                          ? "line-through text-muted-foreground"
+                          : ""
+                      }
                     >
                       {subtask.title}
                     </span>

@@ -1,47 +1,125 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Settings, 
-  LogOut, 
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Calendar,
+  Settings,
+  LogOut,
   Plus,
   Brain,
   Users,
-  Inbox
-} from 'lucide-react';
-import { toast } from 'sonner';
+  Inbox,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
 
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && user.projects && user.projects.length > 0) {
+      fetch("/api/projects")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setProjects(data);
+        })
+        .catch(console.error);
+    }
+  }, [user]);
+
   const handleLogout = async () => {
     await logout();
-    toast.success('Logged out successfully');
-    router.push('/login');
+    toast.success("Logged out successfully");
+    router.push("/login");
+  };
+
+  const switchProject = async (projectId: string) => {
+    try {
+      const res = await fetch("/api/projects/switch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
+      if (res.ok) {
+        toast.success("Project switched");
+        window.location.reload(); // Reload to refresh contexts across the app
+      } else {
+        toast.error("Failed to switch project");
+      }
+    } catch (e) {
+      toast.error("Failed to switch project");
+    }
   };
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/calendar', label: 'Calendar', icon: Calendar },
-    { href: '/assistant', label: 'AI Assistant', icon: Brain },
-    { href: '/team', label: 'Team', icon: Users },
-    { href: '/assignments', label: 'Assignments', icon: Inbox },
-    { href: '/settings', label: 'Settings', icon: Settings },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
+    { href: "/assistant", label: "AI Assistant", icon: Brain },
+    { href: "/team", label: "Team", icon: Users },
+    { href: "/assignments", label: "Assignments", icon: Inbox },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
     <aside className="w-64 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col h-full">
       {/* Header */}
-      <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-xl font-bold text-sidebar-foreground">Todo Scheduler</h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-Powered Tasks</p>
+      <div className="p-4 border-b border-sidebar-border">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between px-2 text-left h-auto py-2"
+            >
+              <div className="flex flex-col items-start truncate overflow-hidden">
+                <span className="text-sm font-bold text-sidebar-foreground truncate max-w-[160px]">
+                  {projects.find((p) => p._id === user?.activeProjectId)
+                    ?.name || "Select Project"}
+                </span>
+                <span className="text-xs text-muted-foreground">Workspace</span>
+              </div>
+              <ChevronsUpDown className="w-4 h-4 text-muted-foreground ml-2 shrink-0" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="start">
+            {projects.map((project) => (
+              <DropdownMenuItem
+                key={project._id}
+                onClick={() => switchProject(project._id)}
+                className="justify-between cursor-pointer"
+              >
+                <span className="truncate">{project.name}</span>
+                {project._id === user?.activeProjectId && (
+                  <Check className="w-4 h-4 ml-2" />
+                )}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem asChild className="cursor-pointer border-t mt-1">
+              <Link
+                href="/onboarding"
+                className="w-full text-primary flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create or Join Project
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Navigation */}
@@ -55,8 +133,8 @@ export function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -77,13 +155,15 @@ export function Sidebar() {
 
         {/* User Info */}
         <div className="mb-4 p-3 bg-sidebar-accent rounded-lg">
-          <p className="text-sm font-medium text-sidebar-accent-foreground">{user?.name}</p>
+          <p className="text-sm font-medium text-sidebar-accent-foreground">
+            {user?.name}
+          </p>
           <p className="text-xs text-muted-foreground">{user?.email}</p>
         </div>
 
         {/* Logout */}
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full gap-2"
           onClick={handleLogout}
         >

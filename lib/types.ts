@@ -6,17 +6,38 @@ export interface User {
   timezone: string;
   workHoursStart: number;
   workHoursEnd: number;
+  activeProjectId?: string;
+  projects?: string[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Project {
+  _id: string;
+  name: string;
+  adminId: string;
+  members: ProjectMember[];
+  inviteCode: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProjectMember {
+  userId: string;
+  email: string;
+  name: string;
+  role: "admin" | "member";
+  joinedAt: Date;
 }
 
 export interface Todo {
   _id: string;
   userId: string;
+  projectId: string;
   title: string;
   description?: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in_progress' | 'completed';
+  priority: "low" | "medium" | "high";
+  status: "pending" | "in_progress" | "completed";
   dueDate?: Date;
   scheduledDate?: Date;
   completionProbability?: number;
@@ -40,7 +61,7 @@ export interface CompletionFeedback {
   userId: string;
   todoId: string;
   timeSpent: number;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: "easy" | "medium" | "hard";
   completed: boolean;
   notes?: string;
   createdAt: Date;
@@ -51,7 +72,7 @@ export interface Assignment {
   todoId: string;
   assignedBy: string;
   assignedTo: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'completed';
+  status: "pending" | "accepted" | "rejected" | "completed";
   delegationMessage?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -61,14 +82,14 @@ export interface TeamMember {
   _id: string;
   email: string;
   name: string;
-  role: 'owner' | 'member';
+  role: "owner" | "member";
   joinedAt: Date;
 }
 
 export interface Notification {
   _id: string;
   userId: string;
-  type: 'assignment' | 'completion' | 'deadline' | 'comment';
+  type: "assignment" | "completion" | "deadline" | "comment";
   title: string;
   message: string;
   read: boolean;

@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { Sidebar } from '@/components/sidebar';
-import { Toaster } from 'sonner';
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { Sidebar } from "@/components/sidebar";
+import { Toaster } from "sonner";
 
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
+    } else if (!isLoading && isAuthenticated && user) {
+      const hasProjects = user.projects && user.projects.length > 0;
+      if (!hasProjects && pathname !== "/onboarding") {
+        router.push("/onboarding");
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router, pathname]);
 
   if (isLoading) {
     return (
@@ -38,9 +40,7 @@ export default function AppLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
       <Toaster />
     </div>
   );

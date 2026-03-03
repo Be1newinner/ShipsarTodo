@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import useSWR from 'swr';
+import { useState, useEffect } from "react";
+import useSWR from "swr";
 
 interface User {
   userId: string;
@@ -9,27 +9,30 @@ interface User {
   name: string;
   timezone: string;
   onboardingComplete: boolean;
+  activeProjectId?: string;
+  projects?: string[];
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useAuth() {
-  const { data: user, error, isLoading, mutate } = useSWR<User>(
-    '/api/auth/me',
-    fetcher,
-    { revalidateOnFocus: false }
-  );
+  const {
+    data: user,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<User>("/api/auth/me", fetcher, { revalidateOnFocus: false });
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Login failed');
+      throw new Error(err.error || "Login failed");
     }
 
     const userData = await res.json();
@@ -38,15 +41,15 @@ export function useAuth() {
   };
 
   const signup = async (email: string, name: string, password: string) => {
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name, password }),
     });
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Signup failed');
+      throw new Error(err.error || "Signup failed");
     }
 
     const userData = await res.json();
@@ -55,8 +58,8 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    mutate(null);
+    await fetch("/api/auth/logout", { method: "POST" });
+    mutate(undefined);
   };
 
   return {

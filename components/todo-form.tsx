@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTodos } from '@/hooks/useTodos';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from "react";
+import { useTodos } from "@/hooks/useTodos";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface TodoFormProps {
   onSuccess?: () => void;
@@ -22,11 +22,11 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
   const { createTodo } = useTodos();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    dueDate: new Date().toISOString().split('T')[0],
-    priority: 'medium' as const,
-    estimatedTime: '',
+    title: "",
+    description: "",
+    dueDate: new Date().toISOString().split("T")[0],
+    priority: "medium" as "low" | "medium" | "high",
+    estimatedTime: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,24 +39,28 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
         description: formData.description,
         dueDate: formData.dueDate,
         priority: formData.priority,
-        estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : 0,
-        status: 'pending',
+        estimatedTime: formData.estimatedTime
+          ? parseInt(formData.estimatedTime)
+          : 0,
+        status: "pending",
         completionProbability: 50,
         subtasks: [],
         tags: [],
       });
 
-      toast.success('Task created successfully!');
+      toast.success("Task created successfully!");
       setFormData({
-        title: '',
-        description: '',
-        dueDate: new Date().toISOString().split('T')[0],
-        priority: 'medium',
-        estimatedTime: '',
+        title: "",
+        description: "",
+        dueDate: new Date().toISOString().split("T")[0],
+        priority: "medium",
+        estimatedTime: "",
       });
       onSuccess?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create task');
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create task",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +90,9 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
           id="description"
           placeholder="Add more details about this task..."
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
           disabled={isLoading}
           rows={3}
         />
@@ -101,7 +107,9 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
             id="dueDate"
             type="date"
             value={formData.dueDate}
-            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, dueDate: e.target.value })
+            }
             required
             disabled={isLoading}
           />
@@ -116,7 +124,7 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
             onValueChange={(value) =>
               setFormData({
                 ...formData,
-                priority: value as 'low' | 'medium' | 'high',
+                priority: value as "low" | "medium" | "high",
               })
             }
           >
@@ -141,14 +149,16 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
           type="number"
           placeholder="30"
           value={formData.estimatedTime}
-          onChange={(e) => setFormData({ ...formData, estimatedTime: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, estimatedTime: e.target.value })
+          }
           disabled={isLoading}
           min="0"
         />
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Creating...' : 'Create Task'}
+        {isLoading ? "Creating..." : "Create Task"}
       </Button>
     </form>
   );
