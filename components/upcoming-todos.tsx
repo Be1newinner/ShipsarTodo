@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { format, isPast, isToday as isTodayDate } from 'date-fns';
-import { AlertCircle, Clock, CheckCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Todo } from '@/lib/types';
-import { getUpcomingTodos, getOverdueTodos } from '@/lib/calendar-utils';
+import { format, isPast, isToday as isTodayDate } from "date-fns";
+import { AlertCircle, Clock, CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Todo } from "@/hooks/useTodos";
+import { getUpcomingTodos, getOverdueTodos } from "@/lib/calendar-utils";
 
 interface UpcomingTodosProps {
   todos: Todo[];
@@ -69,31 +69,32 @@ function TodoItem({ todo, isOverdue }: { todo: Todo; isOverdue?: boolean }) {
   const dueDate = todo.dueDate ? new Date(todo.dueDate) : null;
 
   const priorityColors = {
-    low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    medium:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+    high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
   };
 
   return (
     <div
       className={`flex items-start gap-3 p-3 rounded-lg border ${
         isOverdue
-          ? 'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800'
-          : 'bg-card border-border'
+          ? "bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800"
+          : "bg-card border-border"
       }`}
     >
       <input
         type="checkbox"
-        defaultChecked={todo.status === 'completed'}
+        defaultChecked={todo.status === "completed"}
         disabled
         className="mt-1 w-4 h-4"
       />
       <div className="flex-1 min-w-0">
         <div
           className={`font-medium truncate ${
-            todo.status === 'completed'
-              ? 'line-through text-muted-foreground'
-              : ''
+            todo.status === "completed"
+              ? "line-through text-muted-foreground"
+              : ""
           }`}
         >
           {todo.title}
@@ -102,15 +103,17 @@ function TodoItem({ todo, isOverdue }: { todo: Todo; isOverdue?: boolean }) {
           <div
             className={`text-sm ${
               isOverdue
-                ? 'text-red-700 dark:text-red-200'
+                ? "text-red-700 dark:text-red-200"
                 : isToday
-                  ? 'text-orange-600 dark:text-orange-400'
-                  : 'text-muted-foreground'
+                  ? "text-orange-600 dark:text-orange-400"
+                  : "text-muted-foreground"
             }`}
           >
-            {isToday ? 'Today' : 'Tomorrow' === format(dueDate, 'EEEE')
-              ? 'Tomorrow'
-              : format(dueDate, 'MMM d')}
+            {isToday
+              ? "Today"
+              : "Tomorrow" === format(dueDate, "EEEE")
+                ? "Tomorrow"
+                : format(dueDate, "MMM d")}
           </div>
         )}
       </div>

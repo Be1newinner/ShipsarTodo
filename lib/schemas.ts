@@ -103,11 +103,32 @@ export type Assignment = z.infer<typeof AssignmentSchema>;
 export const NotificationSchema = z.object({
   _id: z.string().optional(),
   userId: z.string(),
-  type: z.enum(["assignment", "deadline", "system"]),
+  type: z.enum([
+    "assignment",
+    "deadline",
+    "system",
+    "team_invite",
+    "invite_accepted",
+    "invite_rejected",
+  ]),
+  title: z.string().optional(),
   message: z.string(),
   relatedItemId: z.string().optional(),
+  fromUserId: z.string().optional(),
+  projectId: z.string().optional(),
   read: z.boolean().default(false),
   createdAt: z.date().default(() => new Date()),
 });
 
 export type Notification = z.infer<typeof NotificationSchema>;
+
+// Activity Schema
+export const ActivitySchema = z.object({
+  _id: z.string().optional(),
+  userId: z.string(),
+  action: z.string(),
+  details: z.any().optional(),
+  createdAt: z.date().default(() => new Date()),
+});
+
+export type Activity = z.infer<typeof ActivitySchema>;

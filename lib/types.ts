@@ -89,10 +89,27 @@ export interface TeamMember {
 export interface Notification {
   _id: string;
   userId: string;
-  type: "assignment" | "completion" | "deadline" | "comment";
+  type:
+    | "assignment"
+    | "completion"
+    | "deadline"
+    | "comment"
+    | "team_invite"
+    | "invite_accepted"
+    | "invite_rejected";
   title: string;
   message: string;
   read: boolean;
   relatedId?: string;
+  fromUserId?: string;
+  projectId?: string;
+  createdAt: Date;
+}
+
+export interface Activity {
+  _id: string;
+  userId: string;
+  action: string;
+  details?: any;
   createdAt: Date;
 }

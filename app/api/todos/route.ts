@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { ObjectId } from "mongodb";
+import { logActivity } from "@/lib/activity-logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -111,6 +112,10 @@ export async function POST(req: NextRequest) {
     };
 
     const result = await todosCollection.insertOne(newTodo);
+    await logActivity(payload.userId, "created_task", {
+      todoId: result.insertedId,
+      title,
+    });
 
     return NextResponse.json(
       { _id: result.insertedId, ...newTodo },

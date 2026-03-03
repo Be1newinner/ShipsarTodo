@@ -2,16 +2,18 @@
 
 import useSWR from "swr";
 
-interface Todo {
+export interface Todo {
   _id: string;
   userId: string;
   projectId: string;
   title: string;
   description?: string;
   dueDate: string;
+  scheduledDate?: string;
   priority: "low" | "medium" | "high";
   status: "pending" | "in_progress" | "completed";
   estimatedTime?: number;
+  estimatedMinutes?: number;
   actualTime?: number;
   completionProbability: number;
   subtasks: Array<{

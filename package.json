@@ -1,5 +1,5 @@
 {
-  "name": "my-project",
+  "name": "todo_scheduler",
   "version": "0.1.0",
   "private": true,
   "scripts": {

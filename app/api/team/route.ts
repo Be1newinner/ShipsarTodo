@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { ObjectId } from "mongodb";
+import { logActivity } from "@/lib/activity-logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,45 +77,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add member to project
-    const updated = await projectsCollection.findOneAndUpdate(
-      { _id: new ObjectId(projectId) },
-      {
-        $push: {
-          members: {
-            userId: newMember._id.toString(),
-            email: newMember.email,
-            name: newMember.name || newMember.email.split("@")[0],
-            role: "member",
-            joinedAt: new Date(),
-          },
-        } as any,
-      },
-      { returnDocument: "after" },
-    );
+    const notificationsCollection = db.collection("notifications");
 
-    // Also update the member's user document
-    const updatePayload: any = {
-      $push: { projects: projectId },
-    };
-    if (!newMember.activeProjectId) {
-      updatePayload.$set = { activeProjectId: projectId };
+    // Check if there is already a pending invitation
+    const existingNotification = await notificationsCollection.findOne({
+      userId: newMember._id.toString(),
+      type: "team_invite",
+      projectId: projectId.toString(),
+      read: false,
+    });
+
+    if (existingNotification) {
+      return NextResponse.json(
+        { message: "Invitation already sent to this user" },
+        { status: 400 },
+      );
     }
-    await usersCollection.updateOne({ _id: newMember._id }, updatePayload);
 
-    // Map back to team structure (for frontend compatibility)
-    const teamFormat = {
-      owner: project.adminId,
-      members: updated?.members?.map((m: any) => ({
-        _id: m.userId,
-        email: m.email,
-        name: m.name,
-        role: m.role === "admin" ? "owner" : "member",
-        joinedAt: m.joinedAt,
-      })),
+    // Create a team_invite notification instead of adding directly
+    const newNotification = {
+      userId: newMember._id.toString(),
+      type: "team_invite",
+      title: "Team Invitation",
+      message: `${currentUser.name || currentUser.email} has invited you to join the project "${project.name}".`,
+      fromUserId: currentUser._id.toString(),
+      projectId: projectId.toString(),
+      read: false,
+      createdAt: new Date(),
     };
 
-    return NextResponse.json(teamFormat);
+    await notificationsCollection.insertOne(newNotification);
+    await logActivity(currentUser._id.toString(), "sent_team_invite", {
+      toUserId: newMember._id.toString(),
+      projectId: projectId.toString(),
+    });
+
+    // Assuming we do not have an updated team member list since the member is not added yet,
+    // we return a success message
+    return NextResponse.json({ message: "Invitation sent successfully" });
   } catch (error) {
     console.error("Add team member error:", error);
     return NextResponse.json(

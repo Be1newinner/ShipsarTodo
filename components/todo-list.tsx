@@ -1,31 +1,9 @@
-'use client';
+"use client";
 
-import { useTodos } from '@/hooks/useTodos';
-import { TodoCard } from './todo-card';
+import { useTodos } from "@/hooks/useTodos";
+import { TodoCard } from "./todo-card";
 
-interface Todo {
-  _id: string;
-  userId: string;
-  title: string;
-  description?: string;
-  dueDate: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in-progress' | 'completed';
-  estimatedTime?: number;
-  actualTime?: number;
-  completionProbability: number;
-  subtasks: Array<{
-    id: string;
-    title: string;
-    completed: boolean;
-    generatedByAI?: boolean;
-  }>;
-  assignedTo?: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
+import { Todo } from "@/hooks/useTodos";
 interface TodoListProps {
   todos: Todo[];
 }
@@ -34,7 +12,9 @@ export function TodoList({ todos }: TodoListProps) {
   if (todos.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No tasks yet. Create one to get started!</p>
+        <p className="text-muted-foreground">
+          No tasks yet. Create one to get started!
+        </p>
       </div>
     );
   }

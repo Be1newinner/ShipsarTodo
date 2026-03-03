@@ -15,6 +15,7 @@ import {
   Inbox,
   ChevronsUpDown,
   Check,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -31,6 +32,7 @@ export function Sidebar() {
   const { user, logout } = useAuth();
 
   const [projects, setProjects] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (user && user.projects && user.projects.length > 0) {
@@ -38,6 +40,17 @@ export function Sidebar() {
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) setProjects(data);
+        })
+        .catch(console.error);
+    }
+
+    if (user) {
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setUnreadCount(data.filter((n: any) => !n.read).length);
+          }
         })
         .catch(console.error);
     }
@@ -73,6 +86,7 @@ export function Sidebar() {
     { href: "/assistant", label: "AI Assistant", icon: Brain },
     { href: "/team", label: "Team", icon: Users },
     { href: "/assignments", label: "Assignments", icon: Inbox },
+    { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 
@@ -131,14 +145,21 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              <div className="flex items-center gap-3">
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </div>
+              {item.href === "/notifications" && unreadCount > 0 && (
+                <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { format, addWeeks, subWeeks, startOfWeek } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Todo } from '@/lib/types';
-import { getWeekView } from '@/lib/calendar-utils';
+import { useState } from "react";
+import { format, addWeeks, subWeeks, startOfWeek } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Todo } from "@/hooks/useTodos";
+import { getWeekView } from "@/lib/calendar-utils";
 
 interface CalendarWeekViewProps {
   todos: Todo[];
@@ -28,7 +28,7 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">
-          Week of {format(weekStart, 'MMM d, yyyy')}
+          Week of {format(weekStart, "MMM d, yyyy")}
         </h2>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={handlePrevWeek}>
@@ -42,7 +42,10 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
 
       {/* Week Grid */}
       <div className="border rounded-lg overflow-x-auto">
-        <div className="grid gap-0" style={{ gridTemplateColumns: `60px repeat(7, 1fr)` }}>
+        <div
+          className="grid gap-0"
+          style={{ gridTemplateColumns: `60px repeat(7, 1fr)` }}
+        >
           {/* Time Column Header */}
           <div className="sticky left-0 bg-muted border-r"></div>
 
@@ -52,9 +55,9 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
               key={day.date.toISOString()}
               className="p-3 border-r border-b bg-muted text-center"
             >
-              <div className="font-semibold">{format(day.date, 'EEE')}</div>
+              <div className="font-semibold">{format(day.date, "EEE")}</div>
               <div className="text-sm text-muted-foreground">
-                {format(day.date, 'd')}
+                {format(day.date, "d")}
               </div>
             </div>
           ))}
@@ -63,15 +66,13 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
           {hours.map((hour) => (
             <div key={`row-${hour}`} className="contents">
               <div className="sticky left-0 p-2 text-sm text-muted-foreground bg-muted border-r border-b text-right">
-                {String(hour).padStart(2, '0')}:00
+                {String(hour).padStart(2, "0")}:00
               </div>
               {days.map((day) => {
                 const dayTodos = todos.filter((todo) => {
                   if (!todo.scheduledDate) return false;
                   const todoDate = new Date(todo.scheduledDate);
-                  return (
-                    todoDate.toDateString() === day.date.toDateString()
-                  );
+                  return todoDate.toDateString() === day.date.toDateString();
                 });
 
                 return (
@@ -84,7 +85,7 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
                       e.preventDefault();
                       try {
                         const data = JSON.parse(
-                          e.dataTransfer.getData('application/json')
+                          e.dataTransfer.getData("application/json"),
                         );
                         if (data.id && onTodoDrop) {
                           const newDate = new Date(day.date);
@@ -101,15 +102,17 @@ export function CalendarWeekView({ todos, onTodoDrop }: CalendarWeekViewProps) {
                         key={todo._id}
                         draggable
                         onDragStart={(e) => {
-                          e.dataTransfer.effectAllowed = 'move';
+                          e.dataTransfer.effectAllowed = "move";
                           e.dataTransfer.setData(
-                            'application/json',
-                            JSON.stringify({ id: todo._id })
+                            "application/json",
+                            JSON.stringify({ id: todo._id }),
                           );
                         }}
                         className="bg-primary/20 text-primary text-xs p-1 rounded mb-1 cursor-move hover:bg-primary/30"
                       >
-                        <div className="font-semibold truncate">{todo.title}</div>
+                        <div className="font-semibold truncate">
+                          {todo.title}
+                        </div>
                         {todo.estimatedMinutes && (
                           <div className="text-xs opacity-75">
                             {todo.estimatedMinutes}min

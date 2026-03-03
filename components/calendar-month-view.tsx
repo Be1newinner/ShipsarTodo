@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Todo } from '@/lib/types';
+import { useState } from "react";
+import { format, addMonths, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Todo } from "@/hooks/useTodos";
 import {
   getCalendarDays,
   assignTodosToCalendarDays,
   CalendarDay,
-} from '@/lib/calendar-utils';
+} from "@/lib/calendar-utils";
 
 interface CalendarMonthViewProps {
   todos: Todo[];
@@ -28,9 +28,9 @@ export function CalendarMonthView({
   const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const weeks = Array.from({ length: Math.ceil(days.length / 7) }, (_, i) =>
-    days.slice(i * 7, (i + 1) * 7)
+    days.slice(i * 7, (i + 1) * 7),
   );
 
   return (
@@ -38,21 +38,13 @@ export function CalendarMonthView({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">
-          {format(currentDate, 'MMMM yyyy')}
+          {format(currentDate, "MMMM yyyy")}
         </h2>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handlePrevMonth}
-          >
+          <Button variant="outline" size="icon" onClick={handlePrevMonth}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleNextMonth}
-          >
+          <Button variant="outline" size="icon" onClick={handleNextMonth}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -63,10 +55,7 @@ export function CalendarMonthView({
         {/* Week Day Headers */}
         <div className="grid grid-cols-7 bg-muted">
           {weekDays.map((day) => (
-            <div
-              key={day}
-              className="p-4 text-center font-semibold text-sm"
-            >
+            <div key={day} className="p-4 text-center font-semibold text-sm">
               {day}
             </div>
           ))}
@@ -116,7 +105,7 @@ function CalendarDayCell({
     e.preventDefault();
     setIsDragOver(false);
     try {
-      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      const data = JSON.parse(e.dataTransfer.getData("application/json"));
       if (data.id && onTodoDrop) {
         onTodoDrop(data.id, day.date);
       }
@@ -133,21 +122,21 @@ function CalendarDayCell({
       onDrop={handleDrop}
       onClick={() => onDateSelect?.(day.date)}
       className={`min-h-24 p-2 border-r border-b cursor-pointer transition-colors ${
-        !day.isCurrentMonth ? 'bg-muted' : ''
-      } ${isDragOver ? 'bg-primary/10' : ''} ${
-        day.isToday ? 'bg-accent/5' : ''
+        !day.isCurrentMonth ? "bg-muted" : ""
+      } ${isDragOver ? "bg-primary/10" : ""} ${
+        day.isToday ? "bg-accent/5" : ""
       }`}
     >
       <div
         className={`text-sm font-semibold mb-1 ${
           day.isToday
-            ? 'text-primary'
+            ? "text-primary"
             : day.isCurrentMonth
-              ? 'text-foreground'
-              : 'text-muted-foreground'
+              ? "text-foreground"
+              : "text-muted-foreground"
         }`}
       >
-        {format(day.date, 'd')}
+        {format(day.date, "d")}
       </div>
       <div className="space-y-1">
         {day.todos.slice(0, 2).map((todo) => (
@@ -157,10 +146,10 @@ function CalendarDayCell({
             onClick={(e) => e.stopPropagation()}
             draggable
             onDragStart={(e) => {
-              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.effectAllowed = "move";
               e.dataTransfer.setData(
-                'application/json',
-                JSON.stringify({ id: todo._id })
+                "application/json",
+                JSON.stringify({ id: todo._id }),
               );
             }}
           >
