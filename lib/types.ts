@@ -43,6 +43,7 @@ export interface Todo {
   completionProbability?: number;
   estimatedMinutes?: number;
   subtasks?: Subtask[];
+  photos?: string[];
   tags?: string[];
   assignedTo?: string;
   createdAt: Date;
@@ -52,8 +53,21 @@ export interface Todo {
 export interface Subtask {
   _id: string;
   title: string;
+  description?: string;
+  dueDate?: Date;
   completed: boolean;
   order: number;
+}
+
+export interface Thread {
+  _id: string;
+  todoId: string;
+  userId: string;
+  title?: string;
+  description: string;
+  photos?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CompletionFeedback {

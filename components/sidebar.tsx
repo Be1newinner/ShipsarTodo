@@ -127,7 +127,7 @@ export function Sidebar() {
             ))}
             <DropdownMenuItem asChild className="cursor-pointer border-t mt-1">
               <Link
-                href="/onboarding"
+                href="/onboarding?new=true"
                 className="w-full text-primary flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -169,12 +169,12 @@ export function Sidebar() {
 
       {/* New Todo Button */}
       <div className="p-6 border-t border-sidebar-border space-y-4">
-        <Button className="w-full gap-2" asChild>
+        {/* <Button className="w-full gap-2" asChild>
           <Link href="/dashboard?new=true">
             <Plus className="w-4 h-4" />
             New Task
           </Link>
-        </Button>
+        </Button> */}
 
         <InstallPwaButton />
 

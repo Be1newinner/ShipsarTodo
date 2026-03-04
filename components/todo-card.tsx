@@ -10,9 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatDistanceToNow } from "date-fns";
 import { MoreVertical, Trash2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 import { Todo } from "@/hooks/useTodos";
 interface TodoCardProps {
@@ -72,15 +73,20 @@ export function TodoCard({ todo }: TodoCardProps) {
               className="mt-1"
             />
             <div className="flex-1 min-w-0">
-              <h3
-                className={`font-semibold text-sm line-clamp-2 ${
-                  todo.status === "completed"
-                    ? "line-through text-muted-foreground"
-                    : ""
-                }`}
+              <Link
+                href={`/dashboard/todos/${todo._id}`}
+                className="hover:underline"
               >
-                {todo.title}
-              </h3>
+                <h3
+                  className={`font-semibold text-sm line-clamp-2 ${
+                    todo.status === "completed"
+                      ? "line-through text-muted-foreground"
+                      : "text-primary"
+                  }`}
+                >
+                  {todo.title}
+                </h3>
+              </Link>
               {todo.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                   {todo.description}

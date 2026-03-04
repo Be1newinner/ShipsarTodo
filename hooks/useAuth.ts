@@ -13,7 +13,14 @@ interface User {
   projects?: string[];
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || "An error occurred");
+  }
+  return res.json();
+};
 
 export function useAuth() {
   const {
@@ -21,7 +28,10 @@ export function useAuth() {
     error,
     isLoading,
     mutate,
-  } = useSWR<User>("/api/auth/me", fetcher, { revalidateOnFocus: false });
+  } = useSWR<User>("/api/auth/me", fetcher, {
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+  });
 
   const login = async (email: string, password: string) => {
     const res = await fetch("/api/auth/login", {

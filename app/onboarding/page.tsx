@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,18 +17,42 @@ import { showSuccess, showError } from "@/lib/toast-utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Plus, LogIn } from "lucide-react";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
-  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const isNew = searchParams.get("new") === "true";
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
 
-  if (user && user.projects && user.projects.length > 0) {
-    // If the user lands here but already has projects, redirect to home
-    router.push("/");
-    return null;
+  const [isRedirecting, setIsRedirecting] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        // Unauthenticated users must login first
+        router.replace("/login");
+      } else if (user && user.projects && user.projects.length > 0 && !isNew) {
+        // Users who already have projects go straight to dashboard unless specifically requesting to create new
+        router.replace("/");
+      } else {
+        // Authenticated users with zero projects, or those asking to create a new one, can see onboarding
+        setIsRedirecting(false);
+      }
+    }
+  }, [authLoading, isAuthenticated, user, router, isNew]);
+
+  if (authLoading || isRedirecting) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="mt-4 text-sm text-muted-foreground">
+          Checking account status...
+        </p>
+      </div>
+    );
   }
 
   const handleCreateProject = async (e: React.FormEvent) => {
@@ -97,13 +121,19 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2">Welcome!</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            {isNew ? "New Project" : "Welcome!"}
+          </h1>
           <p className="text-muted-foreground">
-            You don{"'"}t have any active projects.
+            {isNew
+              ? "Create a new project or join an existing one."
+              : "You don't have any active projects."}
           </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Please create or join one to continue.
-          </p>
+          {!isNew && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Please create or join one to continue.
+            </p>
+          )}
         </div>
 
         <Tabs defaultValue="create" className="w-full">
@@ -199,7 +229,30 @@ export default function OnboardingPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {isNew && (
+          <div className="text-center mt-4">
+            <Button variant="link" onClick={() => router.push("/")}>
+              Cancel and return to dashboard
+            </Button>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      }
+    >
+      <OnboardingContent />
+    </Suspense>
   );
 }

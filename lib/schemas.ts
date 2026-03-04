@@ -54,11 +54,14 @@ export const TodoSchema = z.object({
   estimatedTime: z.number().optional(), // in minutes
   actualTime: z.number().optional(), // in minutes
   completionProbability: z.number().min(0).max(100).default(50),
+  photos: z.array(z.string()).default([]),
   subtasks: z
     .array(
       z.object({
         id: z.string(),
         title: z.string(),
+        description: z.string().optional(),
+        dueDate: z.string().optional(), // ISO date string
         completed: z.boolean().default(false),
         generatedByAI: z.boolean().default(false),
       }),
@@ -85,6 +88,20 @@ export const FeedbackSchema = z.object({
 });
 
 export type Feedback = z.infer<typeof FeedbackSchema>;
+
+// Thread Schema (for Todo comments/discussions)
+export const ThreadSchema = z.object({
+  _id: z.string().optional(),
+  todoId: z.string(),
+  userId: z.string(),
+  title: z.string().optional(),
+  description: z.string(),
+  photos: z.array(z.string()).default([]),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+});
+
+export type Thread = z.infer<typeof ThreadSchema>;
 
 // Team Member Assignment Schema
 export const AssignmentSchema = z.object({

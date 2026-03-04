@@ -157,7 +157,7 @@ export function MobileNav() {
                   className="cursor-pointer border-t mt-1"
                 >
                   <Link
-                    href="/onboarding"
+                    href="/onboarding?new=true"
                     onClick={() => setOpen(false)}
                     className="w-full text-primary flex items-center"
                   >
