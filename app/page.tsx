@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { InstallPwaButton } from "@/components/InstallPwaButton";
 import {
   Card,
   CardContent,
@@ -65,7 +66,7 @@ export default async function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-card/10">
+    <div className="min-h-screen bg-linear-to-b from-background via-background to-card/10">
       {/* Navigation */}
       <nav className="border-b border-border/50 bg-sidebar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -105,7 +106,7 @@ export default async function Home() {
         </div>
 
         {/* Hero Image Placeholder */}
-        <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-2xl p-12 mb-20 border border-primary/30">
+        <div className="bg-linear-to-br from-primary/20 via-primary/10 to-transparent rounded-2xl p-12 mb-20 border border-primary/30">
           <div className="w-full h-96 bg-card rounded-lg border border-border/50 flex items-center justify-center">
             <p className="text-muted-foreground">Dashboard Preview</p>
           </div>
@@ -152,7 +153,7 @@ export default async function Home() {
           </h2>
           <div className="space-y-4">
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-bold">
                 1
               </div>
               <div>
@@ -165,7 +166,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-bold">
                 2
               </div>
               <div>
@@ -179,7 +180,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-bold">
                 3
               </div>
               <div>
@@ -192,7 +193,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-bold">
                 4
               </div>
               <div>
@@ -205,7 +206,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex gap-4 items-start">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 text-sm font-bold">
                 5
               </div>
               <div>
@@ -238,10 +239,11 @@ export default async function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 bg-sidebar mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center gap-4">
           <div className="text-center text-muted-foreground text-sm">
             <p>&copy; 2026 Todo Scheduler. All rights reserved.</p>
           </div>
+          <InstallPwaButton />
         </div>
       </footer>
     </div>

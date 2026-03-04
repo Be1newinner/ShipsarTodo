@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 
+import { InstallPwaButton } from "@/components/InstallPwaButton";
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -91,7 +93,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col h-full">
+    <aside className="hidden md:flex w-64 border-r border-border bg-sidebar text-sidebar-foreground flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-sidebar-border">
         <DropdownMenu>
@@ -166,16 +168,18 @@ export function Sidebar() {
       </nav>
 
       {/* New Todo Button */}
-      <div className="p-6 border-t border-sidebar-border">
-        <Button className="w-full gap-2 mb-4" asChild>
+      <div className="p-6 border-t border-sidebar-border space-y-4">
+        <Button className="w-full gap-2" asChild>
           <Link href="/dashboard?new=true">
             <Plus className="w-4 h-4" />
             New Task
           </Link>
         </Button>
 
+        <InstallPwaButton />
+
         {/* User Info */}
-        <div className="mb-4 p-3 bg-sidebar-accent rounded-lg">
+        <div className="p-3 bg-sidebar-accent rounded-lg">
           <p className="text-sm font-medium text-sidebar-accent-foreground">
             {user?.name}
           </p>

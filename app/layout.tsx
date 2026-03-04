@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Todo Scheduler - AI-Powered Task Management",
   description:
     "Intelligent todo scheduler with AI-powered subtask generation, smart scheduling, and team collaboration",
+  manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
     apple: "/apple-icon.png",

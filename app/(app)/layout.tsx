@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "sonner";
 
+import { MobileNav } from "@/components/mobile-nav";
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -38,7 +40,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background flex-col md:flex-row">
+      <MobileNav />
       <Sidebar />
       <main className="flex-1 overflow-y-auto">{children}</main>
       <Toaster />
