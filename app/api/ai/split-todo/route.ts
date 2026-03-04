@@ -6,6 +6,25 @@ import { streamText, tool } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 
+async function verifyTodoAccess(
+  todo: any,
+  userId: string,
+  db: any,
+): Promise<boolean> {
+  if (todo.userId === userId) return true;
+
+  const user = await db.collection("users").findOne({
+    _id: new ObjectId(userId),
+  });
+
+  if (!user) return false;
+
+  return (
+    user.activeProjectId === todo.projectId ||
+    (user.projects && user.projects.includes(todo.projectId))
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("auth-token")?.value;
@@ -24,11 +43,15 @@ export async function POST(req: NextRequest) {
     const todosCollection = db.collection("todos");
     const todo = await todosCollection.findOne({
       _id: new ObjectId(todoId),
-      $or: [{ userId: payload.userId }, { assignedTo: payload.userId }],
     });
 
     if (!todo) {
       return NextResponse.json({ error: "Todo not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const systemPrompt = `You are a helpful AI assistant built to help users split down large tasks into smaller, manageable sub-todos.

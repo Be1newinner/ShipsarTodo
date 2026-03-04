@@ -3,6 +3,25 @@ import { connectToDatabase } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 
+async function verifyTodoAccess(
+  todo: any,
+  userId: string,
+  db: any,
+): Promise<boolean> {
+  if (todo.userId === userId) return true;
+
+  const user = await db.collection("users").findOne({
+    _id: new ObjectId(userId),
+  });
+
+  if (!user) return false;
+
+  return (
+    user.activeProjectId === todo.projectId ||
+    (user.projects && user.projects.includes(todo.projectId))
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get("auth-token")?.value;
@@ -11,9 +30,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const user = verifyToken(token);
+    const userPayload = verifyToken(token);
 
-    if (!user) {
+    if (!userPayload) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -22,11 +41,21 @@ export async function POST(request: NextRequest) {
     const { db } = await connectToDatabase();
     const todosCollection = db.collection("todos");
 
-    const todo = await todosCollection.findOneAndUpdate(
-      {
-        _id: new ObjectId(todoId),
-        userId: user.userId,
-      },
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(todoId),
+    });
+
+    if (!todo) {
+      return NextResponse.json({ message: "Todo not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, userPayload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+    }
+
+    const result = await todosCollection.findOneAndUpdate(
+      { _id: new ObjectId(todoId) },
       {
         $set: {
           scheduledDate: new Date(scheduledDate),
@@ -36,11 +65,7 @@ export async function POST(request: NextRequest) {
       { returnDocument: "after" },
     );
 
-    if (!todo) {
-      return NextResponse.json({ message: "Todo not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(todo);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Schedule todo error:", error);
     return NextResponse.json(
@@ -58,9 +83,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const user = verifyToken(token);
+    const userPayload = verifyToken(token);
 
-    if (!user) {
+    if (!userPayload) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -69,9 +94,20 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
 
     const { db } = await connectToDatabase();
+
+    // We need the user's activeProjectId
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne({
+      _id: new ObjectId(userPayload.userId),
+    });
+
+    if (!user || !user.activeProjectId) {
+      return NextResponse.json([]); // No active project, so no tasks
+    }
+
     const todosCollection = db.collection("todos");
 
-    const query: any = { userId: user.userId };
+    const query: any = { projectId: user.activeProjectId };
 
     if (startDate && endDate) {
       query.scheduledDate = {

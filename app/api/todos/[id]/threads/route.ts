@@ -4,6 +4,25 @@ import { connectToDatabase } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { ThreadSchema } from "@/lib/schemas";
 
+async function verifyTodoAccess(
+  todo: any,
+  userId: string,
+  db: any,
+): Promise<boolean> {
+  if (todo.userId === userId) return true;
+
+  const user = await db.collection("users").findOne({
+    _id: new ObjectId(userId),
+  });
+
+  if (!user) return false;
+
+  return (
+    user.activeProjectId === todo.projectId ||
+    (user.projects && user.projects.includes(todo.projectId))
+  );
+}
+
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -22,23 +41,24 @@ export async function GET(
     const params = await context.params;
     const { db } = await connectToDatabase();
 
-    // Check if the user has access to the todo
     const todosCollection = db.collection("todos");
     const todo = await todosCollection.findOne({
       _id: new ObjectId(params.id),
-      // In a real app we might check project members too, but let's stick to the current basic check
-      $or: [{ userId: payload.userId }, { assignedTo: payload.userId }],
     });
 
     if (!todo) {
-      // If not the owner or assigned, maybe they are in the project.
-      // For now, assuming they have access if they request it, or we enforce strict checks.
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const threadsCollection = db.collection("threads");
     const threads = await threadsCollection
       .find({ todoId: params.id })
-      .sort({ createdAt: -1 }) // Newest first
+      .sort({ createdAt: -1 })
       .toArray();
 
     return NextResponse.json(threads);
@@ -69,6 +89,22 @@ export async function POST(
     const params = await context.params;
     const body = await req.json();
 
+    const { db } = await connectToDatabase();
+
+    const todosCollection = db.collection("todos");
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(params.id),
+    });
+
+    if (!todo) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const threadData = {
       ...body,
       todoId: params.id,
@@ -77,7 +113,6 @@ export async function POST(
 
     const validatedData = ThreadSchema.parse(threadData);
     const { _id, ...threadToInsert } = validatedData;
-    const { db } = await connectToDatabase();
     const threadsCollection = db.collection("threads");
 
     const result = await threadsCollection.insertOne(threadToInsert as any);

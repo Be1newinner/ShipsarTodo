@@ -4,6 +4,25 @@ import { connectToDatabase } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { logActivity } from "@/lib/activity-logger";
 
+async function verifyTodoAccess(
+  todo: any,
+  userId: string,
+  db: any,
+): Promise<boolean> {
+  if (todo.userId === userId) return true;
+
+  const user = await db.collection("users").findOne({
+    _id: new ObjectId(userId),
+  });
+
+  if (!user) return false;
+
+  return (
+    user.activeProjectId === todo.projectId ||
+    (user.projects && user.projects.includes(todo.projectId))
+  );
+}
+
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -25,11 +44,15 @@ export async function GET(
 
     const todo = await todosCollection.findOne({
       _id: new ObjectId(params.id),
-      userId: payload.userId,
     });
 
     if (!todo) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     return NextResponse.json(todo);
@@ -63,11 +86,21 @@ export async function PUT(
     const { db } = await connectToDatabase();
     const todosCollection = db.collection("todos");
 
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(params.id),
+    });
+
+    if (!todo) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const result = await todosCollection.findOneAndUpdate(
-      {
-        _id: new ObjectId(params.id),
-        userId: payload.userId,
-      },
+      { _id: new ObjectId(params.id) },
       {
         $set: {
           ...body,
@@ -78,7 +111,7 @@ export async function PUT(
     );
 
     if (!result) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Failed to update" }, { status: 500 });
     }
 
     await logActivity(payload.userId, "task_updated", {
@@ -115,13 +148,25 @@ export async function DELETE(
     const { db } = await connectToDatabase();
     const todosCollection = db.collection("todos");
 
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(params.id),
+    });
+
+    if (!todo) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const hasAccess = await verifyTodoAccess(todo, payload.userId, db);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const result = await todosCollection.deleteOne({
       _id: new ObjectId(params.id),
-      userId: payload.userId,
     });
 
     if (result.deletedCount === 0) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

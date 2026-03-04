@@ -61,24 +61,24 @@ export function TodoCard({ todo }: TodoCardProps) {
   const isOverdue = dueDate < new Date() && todo.status !== "completed";
 
   return (
-    <Card
-      className={`border border-slate-800/60 shadow-slate-900/20 shadow-md ${isOverdue ? "border-red-500/50" : ""}`}
+    <Link
+      href={`/dashboard/todos/${todo._id}`}
+      className="group active:scale-99"
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-3 flex-1">
-            <Checkbox
-              checked={todo.status === "completed"}
-              onCheckedChange={handleToggleStatus}
-              className="mt-1 border-2 border-slate-800/60 shadow-slate-900/20 shadow-md"
-            />
-            <div className="flex-1 min-w-0">
-              <Link
-                href={`/dashboard/todos/${todo._id}`}
-                className="hover:underline"
-              >
+      <Card
+        className={`border border-slate-800/60 shadow-slate-900/20 group-hover:shadow-slate-900 shadow-md ${isOverdue ? "border-red-500/50" : ""}`}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-3 flex-1">
+              <Checkbox
+                checked={todo.status === "completed"}
+                onCheckedChange={handleToggleStatus}
+                className="mt-1 border-2 border-slate-800/60 shadow-slate-900/20 shadow-md"
+              />
+              <div className="flex-1 min-w-0">
                 <h3
-                  className={`font-semibold text-sm line-clamp-2 ${
+                  className={`font-semibold text-white/60 text-sm line-clamp-2 ${
                     todo.status === "completed"
                       ? "line-through text-muted-foreground"
                       : "text-primary"
@@ -86,79 +86,81 @@ export function TodoCard({ todo }: TodoCardProps) {
                 >
                   {todo.title}
                 </h3>
-              </Link>
-              {todo.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                  {todo.description}
-                </p>
-              )}
+                {todo.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                    {todo.description}
+                  </p>
+                )}
+              </div>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem disabled>
+                  <Edit2 className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem disabled>
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Subtasks */}
-        {todo.subtasks.length > 0 && (
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">
-              Subtasks: {todo.subtasks.filter((s) => s.completed).length}/
-              {todo.subtasks.length}
-            </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Subtasks */}
+          {todo.subtasks.length > 0 && (
             <div className="space-y-1">
-              {todo.subtasks.slice(0, 2).map((subtask) => (
-                <div key={subtask.id} className="flex items-center gap-2">
-                  <Checkbox checked={subtask.completed} disabled />
-                  <span className="text-xs line-clamp-1">{subtask.title}</span>
-                </div>
-              ))}
-              {todo.subtasks.length > 2 && (
-                <p className="text-xs text-muted-foreground">
-                  +{todo.subtasks.length - 2} more
-                </p>
-              )}
+              <p className="text-xs font-medium text-muted-foreground">
+                Subtasks: {todo.subtasks.filter((s) => s.completed).length}/
+                {todo.subtasks.length}
+              </p>
+              <div className="space-y-1">
+                {todo.subtasks.slice(0, 2).map((subtask) => (
+                  <div key={subtask.id} className="flex items-center gap-2">
+                    <Checkbox checked={subtask.completed} disabled />
+                    <span className="text-xs line-clamp-1">
+                      {subtask.title}
+                    </span>
+                  </div>
+                ))}
+                {todo.subtasks.length > 2 && (
+                  <p className="text-xs text-muted-foreground">
+                    +{todo.subtasks.length - 2} more
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Metadata */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(todo.priority)}`}
-          >
-            {todo.priority}
-          </span>
-          <span
-            className={`text-xs ${isOverdue ? "text-red-600 dark:text-red-400 font-semibold" : "text-muted-foreground"}`}
-          >
-            {formatDistanceToNow(dueDate, { addSuffix: true })}
-          </span>
-          {todo.estimatedTime && (
-            <span className="text-xs text-muted-foreground">
-              ~{todo.estimatedTime}m
-            </span>
           )}
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Metadata */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(todo.priority)}`}
+            >
+              {todo.priority}
+            </span>
+            <span
+              className={`text-xs ${isOverdue ? "text-red-600 dark:text-red-400 font-semibold" : "text-muted-foreground"}`}
+            >
+              {formatDistanceToNow(dueDate, { addSuffix: true })}
+            </span>
+            {todo.estimatedTime && (
+              <span className="text-xs text-muted-foreground">
+                ~{todo.estimatedTime}m
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
