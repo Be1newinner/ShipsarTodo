@@ -16,6 +16,7 @@ import {
   ChevronsUpDown,
   Check,
   Bell,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,6 +28,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { InstallPwaButton } from "@/components/InstallPwaButton";
+import { ViewProjectModal } from "./view-project-modal";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -35,6 +37,7 @@ export function Sidebar() {
 
   const [projects, setProjects] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isViewProjectOpen, setIsViewProjectOpen] = useState(false);
 
   useEffect(() => {
     if (user && user.projects && user.projects.length > 0) {
@@ -93,109 +96,124 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex w-64 border-r border-border bg-sidebar text-sidebar-foreground flex-col h-full">
-      {/* Header */}
-      <div className="p-4 border-b border-sidebar-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-between px-2 text-left h-auto py-2"
-            >
-              <div className="flex flex-col items-start truncate overflow-hidden">
-                <span className="text-sm font-bold text-sidebar-foreground truncate max-w-[160px]">
-                  {projects.find((p) => p._id === user?.activeProjectId)
-                    ?.name || "Select Project"}
-                </span>
-                <span className="text-xs text-muted-foreground">Workspace</span>
-              </div>
-              <ChevronsUpDown className="w-4 h-4 text-muted-foreground ml-2 shrink-0" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="start">
-            {projects.map((project) => (
+    <>
+      <aside className="hidden md:flex w-64 border-r border-border bg-sidebar text-sidebar-foreground flex-col h-full">
+        {/* Header */}
+        <div className="p-4 border-b border-sidebar-border">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-between px-2 text-left h-auto py-2"
+              >
+                <div className="flex flex-col items-start truncate overflow-hidden">
+                  <span className="text-sm font-bold text-sidebar-foreground truncate max-w-[160px]">
+                    {projects.find((p) => p._id === user?.activeProjectId)
+                      ?.name || "Select Project"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Workspace
+                  </span>
+                </div>
+                <ChevronsUpDown className="w-4 h-4 text-muted-foreground ml-2 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              {projects.map((project) => (
+                <DropdownMenuItem
+                  key={project._id}
+                  onClick={() => switchProject(project._id)}
+                  className="justify-between cursor-pointer"
+                >
+                  <span className="truncate">{project.name}</span>
+                  {project._id === user?.activeProjectId && (
+                    <Check className="w-4 h-4 ml-2" />
+                  )}
+                </DropdownMenuItem>
+              ))}
               <DropdownMenuItem
-                key={project._id}
-                onClick={() => switchProject(project._id)}
-                className="justify-between cursor-pointer"
+                className="cursor-pointer border-t mt-1"
+                onClick={() => setIsViewProjectOpen(true)}
               >
-                <span className="truncate">{project.name}</span>
-                {project._id === user?.activeProjectId && (
-                  <Check className="w-4 h-4 ml-2" />
-                )}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuItem asChild className="cursor-pointer border-t mt-1">
-              <Link
-                href="/onboarding?new=true"
-                className="w-full text-primary flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create or Join Project
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-6 space-y-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
-                isActive
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </div>
-              {item.href === "/notifications" && unreadCount > 0 && (
-                <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                  {unreadCount}
+                <span className="w-full text-foreground flex items-center">
+                  <Info className="w-4 h-4 mr-2" />
+                  View Project Info
                 </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* New Todo Button */}
-      <div className="p-6 border-t border-sidebar-border space-y-4">
-        {/* <Button className="w-full gap-2" asChild>
-          <Link href="/dashboard?new=true">
-            <Plus className="w-4 h-4" />
-            New Task
-          </Link>
-        </Button> */}
-
-        <InstallPwaButton />
-
-        {/* User Info */}
-        <div className="p-3 bg-sidebar-accent rounded-lg">
-          <p className="text-sm font-medium text-sidebar-accent-foreground">
-            {user?.name}
-          </p>
-          <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer border-t mt-1"
+              >
+                <Link
+                  href="/onboarding?new=true"
+                  className="w-full text-primary flex items-center"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create or Join Project
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Logout */}
-        <Button
-          variant="outline"
-          className="w-full gap-2"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </Button>
-      </div>
-    </aside>
+        {/* Navigation */}
+        <nav className="flex-1 p-6 space-y-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-between px-4 py-2 rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.href === "/notifications" && unreadCount > 0 && (
+                  <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* New Todo Button */}
+        <div className="p-6 border-t border-sidebar-border space-y-4">
+          <InstallPwaButton />
+
+          {/* User Info */}
+          <div className="p-3 bg-sidebar-accent rounded-lg">
+            <p className="text-sm font-medium text-sidebar-accent-foreground">
+              {user?.name}
+            </p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+
+          {/* Logout */}
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
+      </aside>
+
+      <ViewProjectModal
+        isOpen={isViewProjectOpen}
+        onClose={() => setIsViewProjectOpen(false)}
+        projectId={user?.activeProjectId}
+      />
+    </>
   );
 }
