@@ -170,7 +170,7 @@ export function MobileNav() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+          <nav className="flex-1 overflow-y-auto px-4 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -201,17 +201,6 @@ export function MobileNav() {
 
           {/* New Todo Button & Footer elements */}
           <div className="p-6 border-t border-sidebar-border space-y-4">
-            <Button
-              className="w-full gap-2"
-              asChild
-              onClick={() => setOpen(false)}
-            >
-              <Link href="/dashboard?new=true">
-                <Plus className="w-4 h-4" />
-                New Task
-              </Link>
-            </Button>
-
             <InstallPwaButton />
 
             {/* User Info */}
