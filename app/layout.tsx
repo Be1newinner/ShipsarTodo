@@ -26,6 +26,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +38,7 @@ export default function RootLayout({
       <body className={`${geist.className} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
+          <ServiceWorkerRegister />
         </ThemeProvider>
         <Analytics />
       </body>
