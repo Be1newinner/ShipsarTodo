@@ -28,7 +28,16 @@ export interface Todo {
   updatedAt: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || "An error occurred while fetching the data.",
+    );
+  }
+  return res.json();
+};
 
 export function useTodos() {
   const {
