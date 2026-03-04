@@ -52,14 +52,40 @@ export async function PATCH(
       );
     }
 
+    const todosCollection = db.collection("todos");
+    const usersCollection = db.collection("users");
+
+    // Fetch assignee name for the notification message
+    const assignee = await usersCollection.findOne({
+      _id: new ObjectId(user.userId),
+    });
+
+    if (status === "accepted") {
+      // Actually assign the todo
+      await todosCollection.updateOne(
+        { _id: new ObjectId(assignment.todoId) },
+        {
+          $set: {
+            assignedTo: user.userId,
+            updatedAt: new Date(),
+          },
+        },
+      );
+    }
+
+    // Get the todo to send a more descriptive notification
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(assignment.todoId),
+    });
+
     // Create notification for delegator
     await notificationCollection.insertOne({
       userId: assignment.assignedBy,
       type: "assignment",
-      title: `Assignment ${status}`,
-      message: `Assignment for task was ${status}`,
+      title: `Assignment ${status === "accepted" ? "Accepted" : "Rejected"}`,
+      message: `${assignee?.name || "The user"} has ${status} the assignment for "${todo?.title || "a task"}".`,
       read: false,
-      relatedId: new ObjectId(id),
+      relatedId: assignment.todoId, // Link this directly to the todo so they can view it
       createdAt: new Date(),
     });
 

@@ -66,56 +66,20 @@ export function TodoCard({ todo }: TodoCardProps) {
       className="group active:scale-99"
     >
       <Card
-        className={`border border-slate-800/60 shadow-slate-900/20 group-hover:shadow-slate-900 shadow-md ${isOverdue ? "border-red-500/50" : ""}`}
+        className={`border border-slate-800/60 shadow-slate-900/20 group-hover:shadow-slate-900 shadow-md ${isOverdue ? "border-red-500/50" : ""} flex gap-2`}
       >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-3 flex-1">
-              <Checkbox
-                checked={todo.status === "completed"}
-                onCheckedChange={handleToggleStatus}
-                className="mt-1 border-2 border-slate-800/60 shadow-slate-900/20 shadow-md"
-              />
-              <div className="flex-1 min-w-0">
-                <h3
-                  className={`font-semibold text-white/60 text-sm line-clamp-2 ${
-                    todo.status === "completed"
-                      ? "line-through text-muted-foreground"
-                      : "text-primary"
-                  }`}
-                >
-                  {todo.title}
-                </h3>
-                {todo.description && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                    {todo.description}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        <CardHeader>
+          <h3
+            className={`font-semibold text-white/60 text-sm ${
+              todo.status === "completed"
+                ? "line-through text-muted-foreground"
+                : "text-primary"
+            }`}
+          >
+            {todo.title}
+          </h3>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent>
           {/* Subtasks */}
           {todo.subtasks.length > 0 && (
             <div className="space-y-1">

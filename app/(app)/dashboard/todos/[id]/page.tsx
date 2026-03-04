@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TodoInfo } from "@/components/todo-detail/todo-info";
 import { SubtaskManager } from "@/components/todo-detail/subtask-manager";
 import { ThreadSection } from "@/components/todo-detail/thread-section";
+import { AssignmentManager } from "@/components/todo-detail/assignment-manager";
 import { showSuccess, showError } from "@/lib/toast-utils";
 
 export default function TodoDetailPage() {
@@ -87,9 +88,10 @@ export default function TodoDetailPage() {
 
       <div className="max-w-5xl mx-auto border border-border/50 bg-card rounded-xl p-6 shadow-xs">
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="details">Details & Media</TabsTrigger>
             <TabsTrigger value="subtasks">Subtasks & AI</TabsTrigger>
+            <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="threads">
               Threads ({threads.length})
             </TabsTrigger>
@@ -101,6 +103,10 @@ export default function TodoDetailPage() {
 
           <TabsContent value="subtasks" className="mt-0">
             <SubtaskManager todo={todo} onUpdate={handleUpdate} />
+          </TabsContent>
+
+          <TabsContent value="assignments" className="mt-0">
+            <AssignmentManager todoId={todo._id} projectId={todo.projectId} />
           </TabsContent>
 
           <TabsContent value="threads" className="mt-0">
