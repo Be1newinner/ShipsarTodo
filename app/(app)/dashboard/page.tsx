@@ -115,7 +115,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Todo List */}
-      <Card className="border-border/50">
+      <Card className="border-border">
         <CardHeader>
           <CardTitle>All Tasks</CardTitle>
         </CardHeader>

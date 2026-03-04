@@ -62,7 +62,7 @@ export function TodoCard({ todo }: TodoCardProps) {
 
   return (
     <Card
-      className={`border-border/50 ${isOverdue ? "border-red-500/50" : ""}`}
+      className={`border border-slate-800/60 shadow-slate-900/20 shadow-md ${isOverdue ? "border-red-500/50" : ""}`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
@@ -70,7 +70,7 @@ export function TodoCard({ todo }: TodoCardProps) {
             <Checkbox
               checked={todo.status === "completed"}
               onCheckedChange={handleToggleStatus}
-              className="mt-1"
+              className="mt-1 border-2 border-slate-800/60 shadow-slate-900/20 shadow-md"
             />
             <div className="flex-1 min-w-0">
               <Link

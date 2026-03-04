@@ -22,6 +22,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface TodoInfoProps {
   todo: Todo;
@@ -49,7 +50,6 @@ export function TodoInfo({ todo, onUpdate }: TodoInfoProps) {
   const [status, setStatus] = useState(todo.status);
   const [priority, setPriority] = useState(todo.priority);
   const [photos, setPhotos] = useState<string[]>(todo.photos || []);
-  const [newPhotoUrl, setNewPhotoUrl] = useState("");
 
   const handleSave = async () => {
     setIsUpdating(true);
@@ -70,11 +70,8 @@ export function TodoInfo({ todo, onUpdate }: TodoInfoProps) {
     }
   };
 
-  const addPhoto = () => {
-    if (newPhotoUrl.trim()) {
-      setPhotos([...photos, newPhotoUrl.trim()]);
-      setNewPhotoUrl("");
-    }
+  const addPhoto = (url: string) => {
+    setPhotos([...photos, url]);
   };
 
   const removePhoto = (index: number) => {
@@ -199,15 +196,7 @@ export function TodoInfo({ todo, onUpdate }: TodoInfoProps) {
         )}
 
         <div className="flex gap-2 max-w-md">
-          <Input
-            placeholder="Paste image URL here..."
-            value={newPhotoUrl}
-            onChange={(e) => setNewPhotoUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addPhoto()}
-          />
-          <Button type="button" variant="secondary" onClick={addPhoto}>
-            <Plus className="w-4 h-4" /> Add
-          </Button>
+          <ImageUpload onUpload={addPhoto} buttonText="Add Photo" />
         </div>
       </div>
 

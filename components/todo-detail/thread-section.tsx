@@ -9,6 +9,7 @@ import { showSuccess, showError } from "@/lib/toast-utils";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Plus, Loader2, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface ThreadSectionProps {
   todoId: string;
@@ -75,15 +76,29 @@ export function ThreadSection({
               required
               className="min-h-24 bg-background"
             />
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <ImageIcon className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
-                <Input
-                  placeholder="Image URL (Optional)"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  className="pl-9 bg-background"
-                />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                {photoUrl ? (
+                  <div className="relative group aspect-video h-10 w-20 rounded-md overflow-hidden bg-muted border border-border/50">
+                    <img
+                      src={photoUrl}
+                      alt="Preview"
+                      className="object-cover w-full h-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl("")}
+                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                    >
+                      <Plus className="w-4 h-4 rotate-45" />
+                    </button>
+                  </div>
+                ) : (
+                  <ImageUpload
+                    onUpload={(url) => setPhotoUrl(url)}
+                    buttonText="Attach Image"
+                  />
+                )}
               </div>
               <Button
                 type="submit"
